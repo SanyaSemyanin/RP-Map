@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Интерактивная карта</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        html, body, #map {
+            height: 100%;
+            margin: 0;
+            font-family: sans-serif;
+        }
+        .leaflet-control-layers {
+            background-color: white;
+            padding: 6px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px #aaa;
+        }
+	    .city-label {
+      font-weight: bold;
+      color: black;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 1px 4px;
+      border-radius: 3px;
+      pointer-events: none;
+      white-space: nowrap;
+      font-size: 18px;
+    }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const map = L.map('map', {
+        minZoom: -4,
+        maxZoom: 8,
+        zoomControl: true,
+        center: [0, 0],
+        zoom: 0,
+        crs: L.CRS.Simple
+    });
+
+    const bounds = [[0,0], [2039, 2048]];
+
+    const gosLayer = L.imageOverlay('gos_map.png', bounds);
+    const ecoLayer = L.imageOverlay('eco_map.png', bounds);
+
+    const baseMaps = {
+        "Госкарта": gosLayer,
+        "Экокарта": ecoLayer
+    };
+
+    gosLayer.addTo(map);
+    L.control.layers(baseMaps).addTo(map);
+    map.fitBounds(bounds);
+
+	const cityLabels = [
+  { name: "Гон-Конг", coords: [1288.88, 902.75] },
+  { name: "Хайкоу", coords: [1311.38, 936.63] },
+  { name: "Куньмин", coords: [1302.13, 977.00] },
+  { name: "Доха", coords: [1365.50, 972.25] },
+  { name: "Сана", coords: [1293.63, 1053.25] },
+  { name: "Хельсинки", coords: [1663.88, 89.63] },
+  { name: "Турку", coords: [1663.25, 47.38] },
+  { name: "Оулу", coords: [1721.25, 50.63] },
+  { name: "Осло", coords: [1552.00, 116.00] },
+  { name: "Берген", coords: [1606.38, 55.38] },
+  { name: "Копенгаген", coords: [1483.25, 262.00] },
+  { name: "Ольборг", coords: [1517.38, 304.63] },
+  { name: "Орхус", coords: [1530.00, 155.13] },
+  { name: "Рейкьявик", coords: [1704.50, 356.50] },
+  { name: "Нуук", coords: [1679.75, 380.50] },
+  { name: "Торсхавн", coords: [1915.88, 647.63] },
+  { name: "Стокгольм", coords: [1595.13, 143.13] },
+  { name: "Гётеборг", coords: [1664.88, 156.25] },
+  { name: "Мальмё", coords: [1563.50, 193.13] },
+  { name: "Хельсингборг", coords: [1632.75, 242.75] },
+  { name: "Кейптаун", coords: [517.63, 859.75] },
+  { name: "Йоханнесбург", coords: [489.00, 903.00] },
+  { name: "Дурбан", coords: [538.13, 856.50] },
+  { name: "Порт-Элизабет", coords: [497.38, 835.63] },
+  { name: "Торонто", coords: [375.62, 1463.50] },
+  { name: "Монреаль", coords: [408.75, 1409.87] },
+  { name: "Оттава", coords: [363.00, 1653.63] },
+  { name: "Эдмонтон", coords: [466.75, 1590.38] },
+  { name: "Катманду", coords: [1124.69, 1161.81] },
+  { name: "Амстердам", coords: [1198.62, 802.94] },
+  { name: "Роттердам", coords: [1228.56, 801.63] },
+  { name: "Гаага", coords: [1211.50, 779.75] },
+  { name: "Гаванна", coords: [522.28, 1303.85] },
+  { name: "Порт-Морсби", coords: [1760.88, 1557.75] },
+  { name: "Абу-Даби", coords: [1334.25, 896.25] },
+  { name: "Дубай", coords: [1371.13, 930.31] },
+  { name: "Шарджа", coords: [1358.69, 967.63] },
+  { name: "Будапешт", coords: [1204.88, 755.25] },
+  { name: "Вена", coords: [1244.06, 754.50] },
+  { name: "Триполи", coords: [1086.44, 1084.88] },
+  { name: "Мисурата", coords: [1078.56, 1121.19] },
+  { name: "Дублин", coords: [1144.88, 1781.59] },
+  { name: "Сан-Хуан", coords: [463.75, 1148.94] },
+{ name: "Веллингтон", coords: [1622.47, 1904.66] },
+{ name: "Никосия", coords: [1172.31, 488.03] },
+{ name: "Сидней", coords: [1443.88, 1869.03] },
+{ name: "Мельбурн", coords: [1512.50, 1887.75] },
+{ name: "Брисбен", coords: [1507.28, 1823.78] },
+{ name: "Перт", coords: [1567.91, 1785.78] },
+{ name: "Манама", coords: [1382.25, 969.09] },
+{ name: "Эль-Ахмади", coords: [1328.72, 1008.03] },
+{ name: "Эр-Рияд", coords: [1312.56, 1141.31] },
+{ name: "Джидда", coords: [1317.00, 1184.75] },
+{ name: "Мекка", coords: [1342.69, 1127.81] },
+{ name: "Медина", coords: [1331.38, 1069.13] },
+{ name: "Варшава", coords: [1253.19, 720.06] },
+{ name: "Краков", coords: [1274.97, 736.41] },
+{ name: "Вроцлав", coords: [1234.59, 706.09] },
+{ name: "Лодзь", coords: [1271.78, 676.25] },
+{ name: "Познань", coords: [1327.63, 713.31] },
+{ name: "Кабул", coords: [1235.63, 1146.69] },
+{ name: "Герат", coords: [1213.06, 1108.50] },
+{ name: "Кандагар", coords: [1264.94, 1200.63] },
+{ name: "Багдад", coords: [1313.81, 997.19] },
+{ name: "Мосул", coords: [1319.88, 970.88] },
+{ name: "Басра", coords: [1341.44, 974.19] },
+{ name: "Амман", coords: [1385.81, 860.19] },
+{ name: "Эз-Зарка", coords: [1368.63, 894.38] },
+{ name: "Иерусалим", coords: [1363.56, 858.94] },
+{ name: "Тель-Авив", coords: [1350.75, 840.94] },
+{ name: "Хайфа", coords: [1351.75, 870.13] },
+{ name: "Газа", coords: [1335.69, 880.56] },
+{ name: "Мадрид", coords: [1785.47, 900.00] },
+{ name: "Барселона", coords: [1769.44, 866.06] },
+{ name: "Афины", coords: [1158.75, 522.47] },
+{ name: "Салоники", coords: [1174.91, 529.06] },
+{ name: "Токио", coords: [1844.69, 1005.81] },
+{ name: "Иокогама", coords: [1854.91, 978.94] },
+{ name: "Осака", coords: [1781.78, 1025.13] },
+{ name: "Нагоя", coords: [1843.63, 1058.31] },
+{ name: "Киото", coords: [1899.53, 882.25] },
+{ name: "Тайбэй", coords: [1714.91, 928.94] },
+{ name: "Тайчжун", coords: [1743.59, 927.66] },
+{ name: "Гаосюн", coords: [1748.38, 946.56] },
+{ name: "Берлин", coords: [1303.50, 782.69] },
+{ name: "Гамбург", coords: [1342.63, 802.09] },
+{ name: "Мюнхен", coords: [1321.91, 797.44] },
+{ name: "Кёльн", coords: [1260.53, 769.63] },
+{ name: "Штутгарт", coords: [1327.03, 759.09] },
+{ name: "Рим", coords: [1270.69, 884.31] },
+{ name: "Милан", coords: [1328.00, 867.91] },
+{ name: "Венеция", coords: [1248.97, 840.88] },
+{ name: "Турин", coords: [1319.94, 829.66] },
+{ name: "Неаполь", coords: [1287.19, 834.03] },
+{ name: "Лондон", coords: [1095.25, 1743.56] },
+{ name: "Манчестер", coords: [1066.81, 1696.06] },
+{ name: "Бирмингем", coords: [749.13, 1755.78] },
+{ name: "Севастополь", coords: [1416.00, 857.06] },
+{ name: "Лидс", coords: [254.03, 1625.41] },
+{ name: "Глазго", coords: [1231.25, 1791.31] },
+{ name: "Эдинбург", coords: [1164.19, 1747.25] },
+{ name: "Ливерпуль", coords: [1128.41, 1730.81] },
+{ name: "Париж", coords: [1080.56, 688.25] },
+{ name: "Марсель", coords: [1040.00, 691.63] },
+{ name: "Лион", coords: [1155.06, 797.25] },
+{ name: "Тулуза", coords: [1198.88, 730.72] },
+{ name: "Нант", coords: [1167.75, 724.50] },
+{ name: "Реймс", coords: [1167.57, 755.04] },
+{ name: "Мехико", coords: [299.31, 994.75] },
+{ name: "Трихуана", coords: [240.69, 1099.63] },
+{ name: "Леон", coords: [389.78, 1012.41] },
+{ name: "Пуэбла", coords: [207.25, 1026.75] },
+{ name: "Сьюдад-Хуарес", coords: [521.00, 952.06] },
+{ name: "Кульякан", coords: [410.94, 930.59] },
+{ name: "Котте", coords: [1049.38, 911.81] },
+{ name: "Каир", coords: [1237.44, 1035.75] },
+{ name: "Александрия", coords: [1257.94, 1010.94] },
+{ name: "Гиза", coords: [1295.19, 1147.69] },
+{ name: "Шубра-эль-Хейма", coords: [1235.56, 1090.94] },
+{ name: "Анкара", coords: [1446.88, 904.56] },
+{ name: "Стамбул", coords: [1447.53, 964.84] },
+{ name: "Измир", coords: [1475.75, 933.56] },
+{ name: "Бурса", coords: [1438.22, 929.50] },
+{ name: "Анталия", coords: [1414.06, 945.13] },
+{ name: "Адана", coords: [1398.00, 881.94] },
+{ name: "Манила", coords: [1678.56, 1534.13] },
+{ name: "Давао", coords: [1659.69, 1581.19] },
+{ name: "Кесон-Сити", coords: [1695.75, 1495.30] },
+{ name: "Тегеран", coords: [1405.06, 1105.25] },
+{ name: "Машхад", coords: [1392.06, 1128.81] },
+{ name: "Исфахан", coords: [1407.88, 1054.69] },
+{ name: "Кардж", coords: [1429.25, 1117.31] },
+{ name: "Тебриз", coords: [1330.88, 1198.44] },
+{ name: "Кум", coords: [1446.00, 1176.31] },
+{ name: "Дамаск", coords: [1393.63, 939.25] },
+{ name: "Алеппо", coords: [1401.56, 916.25] },
+{ name: "Хомс", coords: [1400.69, 899.25] },
+{ name: "Ракка", coords: [1379.72, 906.34] },
+{ name: "Тартус", coords: [1369.94, 947.91] },
+{ name: "Сеул", coords: [1822.69, 813.56] },
+{ name: "Пусан", coords: [1823.50, 787.56] },
+{ name: "Исламабад", coords: [1186.00, 1170.50] },
+{ name: "Карачи", coords: [1281.69, 1240.38] },
+{ name: "Лахор", coords: [1299.38, 1197.25] },
+{ name: "Кветта", coords: [1148.06, 1129.31] },
+{ name: "Пешавар", coords: [1217.75, 1231.75] },
+{ name: "Мултан", coords: [1236.13, 1206.00] },
+{ name: "Москва", coords: [1414.44, 796.38] },
+{ name: "Санкт-Петербург", coords: [1518.69, 570.81] },
+{ name: "Новосибирск", coords: [1776.63, 681.31] },
+{ name: "Казань", coords: [1654.56, 745.88] },
+{ name: "Челябинск", coords: [1497.81, 677.75] },
+{ name: "Ростов-на-Дону", coords: [1337.63, 619.69] },
+{ name: "Уфа", coords: [1648.94, 688.56] },
+{ name: "Омск", coords: [1563.31, 695.06] },
+{ name: "Пермь", coords: [1605.13, 723.88] },
+{ name: "Воронеж", coords: [1444.13, 745.38] },
+{ name: "Волгоград", coords: [1421.94, 673.63] },
+{ name: "Смоленск", coords: [1461.69, 713.13] },
+{ name: "Киев", coords: [1438.06, 774.94] },
+{ name: "Харьков", coords: [1407.06, 723.69] },
+{ name: "Минск", coords: [1431.38, 810.50] },
+{ name: "Вильнюс", coords: [1328.63, 687.31] },
+{ name: "Рига", coords: [1311.31, 653.63] },
+{ name: "Таллин", coords: [1295.81, 668.19] },
+{ name: "Одесса", coords: [1381.81, 794.31] },
+{ name: "Тбилиси", coords: [1494.50, 846.13] },
+{ name: "Баку", coords: [1563.38, 851.56] },
+{ name: "Ереван", coords: [1515.81, 826.44] },
+{ name: "Астана", coords: [1602.81, 826.44] },
+{ name: "Алматы", coords: [1605.69, 765.75] },
+{ name: "Краснодар", coords: [1498.13, 777.00] },
+{ name: "Нью-Дели", coords: [1153.44, 1190.81] },
+{ name: "Мумбаи", coords: [1068.00, 1175.06] },
+{ name: "Дели", coords: [1080.19, 1156.75] },
+{ name: "Сурат", coords: [1124.13, 1210.50] },
+{ name: "Пуна", coords: [1142.56, 1287.06] },
+{ name: "Джайпур", coords: [1215.06, 1256.00] },
+{ name: "Бхопал", coords: [1162.50, 1240.69] },
+{ name: "Вашингтон", coords: [269.06, 1263.19] },
+{ name: "Нью-Йорк", coords: [360.88, 1306.38] },
+{ name: "Лос-Анджелес", coords: [213.13, 1157.31] },
+{ name: "Чикаго", coords: [297.63, 1423.38] },
+{ name: "Хьюстон", coords: [149.50, 1171.00] },
+{ name: "Финикс", coords: [274.81, 1139.69] },
+{ name: "Сан-Антонио", coords: [251.50, 1157.56] },
+{ name: "Сан-Диего", coords: [325.13, 1195.13] },
+{ name: "Даллас", coords: [220.88, 1298.13] },
+{ name: "Джексонвиль", coords: [231.38, 1512.25] },
+{ name: "Форт-Уэрт", coords: [322.88, 1275.00] },
+{ name: "Бостон", coords: [227.50, 1568.00] },
+{ name: "Майами", coords: [188.63, 1303.25] },
+{ name: "Сиэтл", coords: [373.63, 1393.63] },
+{ name: "Филадельфия", coords: [301.63, 1356.25] },
+{ name: "Пекин", coords: [1176.44, 1062.13] },
+{ name: "Шанхай", coords: [1190.44, 1067.19] },
+{ name: "Чунцин", coords: [1160.56, 1094.31] },
+{ name: "Владивосток", coords: [1815.94, 752.69] },
+{ name: "Гуанчжоу", coords: [1809.88, 809.63] },
+{ name: "Чэнду", coords: [1762.81, 798.06] },
+{ name: "Ухань", coords: [1762.50, 841.38] },
+{ name: "Сиань", coords: [1727.00, 784.50] },
+{ name: "Нанкин", coords: [1681.19, 749.38] },
+{ name: "Циндао", coords: [1718.94, 845.25] },
+{ name: "Далянь", coords: [1725.69, 900.63] },
+{ name: "Сучжоу", coords: [1648.88, 891.69] },
+{ name: "Шэньян", coords: [1653.81, 863.31] },
+{ name: "Харбин", coords: [1639.50, 829.75] },
+{ name: "Чанша", coords: [1579.50, 845.13] }
+];
+
+// функция для отображения названий городов
+function addCityLabels() {
+  map.eachLayer(layer => {
+    if (layer.options && layer.options.pane === 'markerPane' && layer._icon && layer._icon.classList.contains('city-label')) {
+      map.removeLayer(layer);
+    }
+  });
+
+  if (map.getZoom() >= 3) {
+    cityLabels.forEach(city => {
+      L.marker(city.coords, {
+        interactive: false,
+        icon: L.divIcon({
+          className: 'city-label',
+          html: city.name,
+          iconSize: [100, 20]
+        })
+      }).addTo(map);
+    });
+  }
+}
+
+map.on('zoomend', addCityLabels);
+addCityLabels();
+
+</script>
+</body>
+</html>
