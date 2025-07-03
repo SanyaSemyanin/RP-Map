@@ -31,7 +31,14 @@
     </style>
 </head>
 <body>
+  <button id="toggleGrid"
+    style="position: absolute; bottom: 30px; left: 20px; z-index: 1000; background: white; border: 1px solid #ccc; padding: 5px 10px; cursor: pointer;">
+    Показать сетку
+  </button>
 <div id="map"></div>
+<div id="scaleLabel" style="position: absolute; left: 20px; bottom: 90px; background: rgba(255,255,255,0.8); padding: 4px 8px; font-size: 14px; border-radius: 3px; display: none; z-index: 1000;">
+  1 квадратик = 1000 км
+</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     const map = L.map('map', {
@@ -55,7 +62,7 @@
 
     gosLayer.addTo(map);
     L.control.layers(baseMaps).addTo(map);
-    map.fitBounds(bounds);
+    map.setView([1020, 1024], -2);
 
 	const cityLabels = [
   { name: "Гон-Конг", coords: [1288.88, 902.75] },
@@ -294,6 +301,53 @@ function addCityLabels() {
 map.on('zoomend', addCityLabels);
 addCityLabels();
 
+    function enableCoordinateClick(map) {
+      map.on('click', function(e) {
+        const lat = e.latlng.lat.toFixed(5);
+        const lng = e.latlng.lng.toFixed(5);
+        L.popup()
+          .setLatLng(e.latlng)
+          .setContent(`Координаты: ${lat}, ${lng}`)
+          .openOn(map);
+
+        console.log(`Широта: ${lat}, Долгота: ${lng}`);
+      });
+    }
+
+    enableCoordinateClick(map);
+
+  let gridLayer = null;
+  let gridVisible = false;
+  const scaleLabel = document.getElementById("scaleLabel");
+
+  document.getElementById("toggleGrid").addEventListener("click", function () {
+    if (!gridLayer) {
+      gridLayer = L.layerGroup();
+      const spacing = 50; // Здесь меняешь расстояние между линиями сетки
+
+      // Подставь размер карты 0..2000, если твоя карта ~2039x2048
+      for (let x = 0; x <= 2039; x += spacing) {
+        const line = L.polyline([[0, x], [2039, x]], { color: 'black', weight: 1, opacity: 0.3 });
+        gridLayer.addLayer(line);
+      }
+      for (let y = 0; y <= 2048; y += spacing) {
+        const line = L.polyline([[y, 0], [y, 2048]], { color: 'black', weight: 1, opacity: 0.3 });
+        gridLayer.addLayer(line);
+      }
+    }
+
+    if (!gridVisible) {
+      map.addLayer(gridLayer);
+      this.textContent = "Скрыть сетку";
+      scaleLabel.style.display = "block";
+    } else {
+      map.removeLayer(gridLayer);
+      this.textContent = "Показать сетку";
+      scaleLabel.style.display = "none";
+    }
+
+    gridVisible = !gridVisible;
+  });
 </script>
 </body>
 </html>
